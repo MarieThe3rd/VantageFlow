@@ -5,6 +5,9 @@ namespace VantageFlow.Core.Modules.TaskManager.Models;
 /// </summary>
 public sealed class Person
 {
+    /// <summary>0 until persisted; EF Core assigns the real value on save.</summary>
+    public int Id { get; set; }
+
     // Not `required`: WinUI's generated XAML type metadata (XamlTypeInfo.g.cs) needs a
     // parameterless activator for any type reachable from a binding, and can't satisfy a
     // `required` member. Non-emptiness is enforced where a Person is actually created —

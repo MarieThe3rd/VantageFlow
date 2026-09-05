@@ -51,7 +51,6 @@ Verified against Microsoft's current WinUI/WindowsAppSDK testing docs before dec
 ## 10. Open decisions
 
 - **License:** not yet chosen.
-- **Persistence:** not yet decided how the task manager module stores data (reference app spliced its metadata into the OS Task Scheduler's free-text field as a workaround for that specific external API — this app should default to owning a real data store per module, e.g. SQLite, rather than needing a similar trick).
 
 ## 11. Core architecture checked against Microsoft's own guidance
 
@@ -108,3 +107,16 @@ Checked against Microsoft's current sideloading/signing docs rather than assumed
 - The old one-click "install from a browser link" flow (`ms-appinstaller:` URI) has been **disabled by default since December 2023** — so a hosted `.appinstaller` file now means "download and double-click," not "click a website button," similar in spirit to how the reference app pointed people at winget/Chocolatey/Scoop rather than a web installer.
 
 **Open decision, not blocking now**: which certificate to use for actual releases (self-signed vs. Azure Artifact Signing) — revisit when preparing the first real release, not before. Local development (F5 debugging) is unaffected either way.
+
+## 18. Persistence: SQLite + EF Core, via `IDbContextFactory`
+
+Resolved the last item from §10. Went with the recommendation over hand-rolled ADO.NET/Dapper: the domain is genuinely relational (many Tasks reference the same Person/Project/Source — exactly the reused-entity shape decided in §13), and EF Core Migrations gives the schema-versioning story `02-architecture-and-testing-strategy.md` §9 already said was wanted, for free.
+
+Lives entirely in `VantageFlow.Core` (`Modules/TaskManager/Data/`, `Services/`) — EF Core has no WinUI dependency, so this doesn't strain the project split from §16. Only the SQLite file *path* (`ApplicationData.Current.LocalFolder.Path`, a package-identity API) is computed in the app project, in `TaskManagerModule.RegisterServices`.
+
+Three non-obvious things this surfaced, each written up in `Documentation/Walkthroughs/06-sqlite-persistence-with-ef-core.md`:
+- **`IDbContextFactory<T>`, not `AddDbContext`** — a desktop app has no natural per-request scope for EF Core's default `Scoped` lifetime to attach to; `AddDbContextFactory` is Microsoft's documented pattern for exactly this.
+- **Shadow FK properties** for `TaskItem`'s two `Person` references (Requester, Recipient) — EF Core can't infer which foreign key belongs to which navigation without explicit configuration, and shadow properties (declared only in `OnModelCreating`, not on the model) keep the FK columns out of the domain type.
+- **Disconnected entities**: a fresh `DbContext` per repository call means a Requester saved by one call is "unknown" to a Task saved by the next — has to be `Attach()`-ed as `Unchanged` or EF Core tries to insert a duplicate Person. A real integration test (`TaskRepositoryTests`, against a genuine temp-file SQLite database, not a fake) specifically guards this.
+
+Migrations are authored with `dotnet-ef` against `VantageFlow.Core` (`--project`) using `VantageFlow` as the runtime host (`--startup-project`) — a class-library-only project couldn't run the design-time tooling on its own (its `UseWinUI=true` still pulls in a Windows SDK runtime pack the design-time host can't resolve standalone). Applied automatically at app startup via `TaskManagerModule.StartAsync` (`Database.MigrateAsync()`), not by a separate install step.

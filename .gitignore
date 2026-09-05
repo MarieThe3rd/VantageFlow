@@ -39,3 +39,8 @@ BundleArtifacts/
 
 ## Build logs ##
 *.binlog
+
+## Local SQLite databases (runtime data, never source) ##
+*.db
+*.db-shm
+*.db-wal

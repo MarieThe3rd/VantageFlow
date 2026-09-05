@@ -13,6 +13,7 @@ Numbered in the order the corresponding code was actually built, not by folder o
 3. [03-navigation-shell-and-modules.md](03-navigation-shell-and-modules.md) — `NavigationView`, `IAppModule`, how a module plugs in
 4. [04-why-a-separate-class-library-for-tests.md](04-why-a-separate-class-library-for-tests.md) — the real test failure that forced the three-project split
 5. [05-add-task-dialogs-and-converters.md](05-add-task-dialogs-and-converters.md) — `ContentDialog`, `IValueConverter`, and a `required`-properties gotcha in generated XAML metadata
+6. [06-sqlite-persistence-with-ef-core.md](06-sqlite-persistence-with-ef-core.md) — `IDbContextFactory` for desktop apps, shadow FK properties, the disconnected-entity gotcha, and running EF migrations against a class-library project
 
 More entries get added as each meaningful chunk of code lands (see `CLAUDE.md`'s "Learning companion" convention).
 

@@ -7,6 +7,9 @@ namespace VantageFlow.Core.Modules.TaskManager.Models;
 /// </summary>
 public sealed class TaskItem
 {
+    /// <summary>0 until persisted; EF Core assigns the real value on save.</summary>
+    public int Id { get; set; }
+
     // Not `required` — see the same note on Person.Name; enforced in AddTaskDialog instead.
     public string Title { get; set; } = string.Empty;
     public string? Notes { get; set; }

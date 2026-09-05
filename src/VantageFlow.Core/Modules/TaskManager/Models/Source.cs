@@ -7,7 +7,11 @@ namespace VantageFlow.Core.Modules.TaskManager.Models;
 /// </summary>
 public sealed class Source
 {
-    public required string Name { get; set; }
+    /// <summary>0 until persisted; EF Core assigns the real value on save.</summary>
+    public int Id { get; set; }
+
+    // Not `required` — see Person.Name's note; enforced wherever a Source is actually created.
+    public string Name { get; set; } = string.Empty;
 
     /// <summary>Whether Tasks using this Source carry a Ticket Number and Ticket Link.</summary>
     public bool IsTicket { get; set; }

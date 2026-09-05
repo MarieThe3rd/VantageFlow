@@ -125,8 +125,8 @@ Static app *configuration* (API endpoints, feature flags — values that don't c
 
 Worth deciding the shape of this early, even before it's needed, since retrofitting a migration story onto live user data later is painful:
 
-- **Local data schema**: version it, and run a migration step at startup that upgrades from any previous version to current (a `DatabaseMigrator`-style class with a switch on stored schema version is the standard shape).
-- **Settings schema**: same idea — store a version alongside the settings, transform old shapes forward on load.
+- **Local data schema**: version it, and run a migration step at startup that upgrades from any previous version to current (a `DatabaseMigrator`-style class with a switch on stored schema version is the standard shape). **Implemented** for the TaskManager module: real EF Core Migrations (not `EnsureCreated`, which can't evolve a schema), applied via `Database.MigrateAsync()` in `TaskManagerModule.StartAsync` on every launch — see `01-decisions-log.md` §18 and `Documentation/Walkthroughs/06`.
+- **Settings schema**: same idea — store a version alongside the settings, transform old shapes forward on load. Not yet implemented (no settings exist yet).
 - Each module's persistence is a natural place to own its own schema version, consistent with §7/§8's "each module owns its own store/settings" split.
 
 ## 10. Actual folder/project structure
@@ -150,6 +150,9 @@ src/
       TaskManager/
         Models/
         ViewModels/
+        Data/                     — DbContext + EF Core model configuration (§9 persistence)
+        Services/                 — IFooRepository + EF Core–backed implementation pairs
+    Migrations/                   — EF Core migrations (one folder per DbContext, if more than one)
     ShellViewModel.cs
   VantageFlow.Tests/               — references VantageFlow.Core only, never the app project
     Modules/TaskManager/           — mirrors VantageFlow.Core's module folders

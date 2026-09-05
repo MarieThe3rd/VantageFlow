@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
 using VantageFlow.Core.Modules.TaskManager.ViewModels;
 using VantageFlow.Modules.TaskManager.Views.Dialogs;
 
@@ -15,12 +16,18 @@ public sealed partial class TasksPage : Page
         InitializeComponent();
     }
 
+    protected override async void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        await ViewModel.LoadAsync();
+    }
+
     private async void NewTask_Click(object sender, RoutedEventArgs e)
     {
         var dialog = new AddTaskDialog(ViewModel.People) { XamlRoot = XamlRoot };
         if (await dialog.ShowAsync() == ContentDialogResult.Primary && dialog.Result is not null)
         {
-            ViewModel.AddTask(dialog.Result);
+            await ViewModel.AddTaskAsync(dialog.Result);
         }
     }
 
@@ -29,7 +36,7 @@ public sealed partial class TasksPage : Page
         var dialog = new AddPersonDialog { XamlRoot = XamlRoot };
         if (await dialog.ShowAsync() == ContentDialogResult.Primary && dialog.Result is not null)
         {
-            ViewModel.AddPerson(dialog.Result);
+            await ViewModel.AddPersonAsync(dialog.Result);
         }
     }
 }
