@@ -1,0 +1,24 @@
+## Visual Studio ##
+.vs/
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## OS X ##
+.DS_Store
+
+## Windows ##
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+## Logs ##
+*.log
+
+#publish directory
+[Pp]ublish/
+[Dd]ist/
+[Rr]eleases/
