@@ -27,3 +27,7 @@ _Avoid_: Channel, origin, medium
 **Project**:
 A tracked effort with its own description and target date, containing the set of Tasks that belong to it, viewable as a unit. A Task can belong to a Project, have a Requester, both, or neither — they're independent facts, not alternatives (a manager can assign you a piece of a larger project, giving both at once).
 _Avoid_: Initiative, epic
+
+**Commitment**:
+Whether a Task is an **Obligation** (something the user has to do) or an **Idea** (something they thought of wanting to do, someday). Deliberately a two-state distinction, not a numeric scale, to avoid the ambiguity of picking a priority number. Independent of Requester/Project/Recipient — a self-directed task can still be a real Obligation.
+_Avoid_: Priority (already means something else in this space — see `01-decisions-log.md` §14)

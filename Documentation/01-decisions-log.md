@@ -72,3 +72,9 @@ Before any code: a Task needed to track *who asked for it, why, through what cha
 Two follow-on scope decisions:
 - **Person is a reusable entity** (name + relationship, e.g. "Sarah — Manager"), not free text per task — chosen specifically so "everything Sarah asked for" is a reliable filter later, not a typo-prone guess.
 - **Project is a fuller entity from day one** (its own description and target date, its tasks viewable as a unit), not a lightweight tag — chosen because a project-level view is a known, not speculative, need.
+
+## 14. Commitment: Obligation vs. Idea, as a binary — not a priority scale
+
+Stated problem: too many self-generated "ideas" cluttering the to-do list alongside real obligations, making it hard to tell what actually matters. First floated as "a priority setting, 0 being not important" — rejected in favor of a plain two-state `Commitment` (`Obligation` | `Idea`, see `CONTEXT.md`), because a numeric scale reintroduces the same ambiguity it's meant to solve (deciding "is this a 2 or a 3" for every item). A checked-box UI, default unchecked (= Obligation), covers this cleanly.
+
+Checked whether the reference app already had this: it has a same-named-but-unrelated `TaskPriority` field on `ScheduledTaskModel` (`Models/ScheduledTaskModel.cs:306`) — Windows Task Scheduler's OS process-scheduling priority (0=Realtime to 10=Idle, 7=Normal, i.e. CPU precedence for the triggered process), not a personal-importance concept. Confirms this is new domain, and rules out reusing the word "Priority" for it (already means something else in this space).
