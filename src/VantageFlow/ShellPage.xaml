@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="VantageFlow.ShellPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:VantageFlow"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <!--
+        The shell hosts navigation only — no feature content lives here. Each module
+        contributes its NavigationViewItems (built in code-behind from ShellViewModel's
+        NavigationItems); ContentFrame displays whichever page is currently selected.
+    -->
+    <NavigationView
+        x:Name="Nav"
+        IsSettingsVisible="False"
+        ItemInvoked="Nav_ItemInvoked">
+        <Frame x:Name="ContentFrame" />
+    </NavigationView>
+</Page>

@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "VantageFlow (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "VantageFlow (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

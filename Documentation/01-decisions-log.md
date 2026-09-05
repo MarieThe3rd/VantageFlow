@@ -84,3 +84,14 @@ Checked whether the reference app already had this: it has a same-named-but-unre
 When Source is a ticket, it's always from a *specific* system (Ivanti, ADO work items, ...), each needing its own Ticket Number and Ticket Link. Rather than a generic "Ticket" value plus a separate "which system" field, the system itself is the Source value (`Ivanti Ticket`, `ADO Work Item`), matching how the user actually thinks about it.
 
 That list is user-maintainable, same pattern and same reasoning as Person (§13): a new job or a new tool bringing a different ticketing system (e.g., ServiceNow) should be something you add yourself, not something that needs a code change and a new release.
+
+## 16. Split into three projects: VantageFlow, VantageFlow.Core, VantageFlow.Tests — forced by a real test failure
+
+Started scaffolding with one WinUI project (per the original §11 folder sketch) plus a test project referencing it directly. The very first test — a trivial "new Task defaults to Obligation" check — failed with `COMException: Class not registered`, not a logic bug: referencing the WinUI *app* project at all (even just for a plain POCO) pulls in the Windows App SDK's deployment/bootstrap auto-initializer, which throws outside a packaged app's own process. Verified against Microsoft's own docs before restructuring rather than guessing: "unit test projects can't directly reference WinUI app projects" — their documented fix is exactly a separate class library.
+
+Resolved as three projects, not two:
+- **`VantageFlow.Core`** (a *WinUI Class Library*, not a plain one — `UseWinUI=true` but no `Microsoft.WindowsAppSDK` package reference, so no deployment auto-initializer): `Core/` (`IAppModule`, `INavigationService`, `NavigationItem`, `NavigationIcon`) and `Modules/*/Models`, `Modules/*/ViewModels`. Everything here must compile with zero WinUI-framework types (see `NavigationIcon` below) — that constraint is what keeps it testable.
+- **`VantageFlow`** (the WinUI head/app project): `App.xaml.cs` (composition root), `MainWindow`, `ShellPage`, the concrete `NavigationService` (wraps `Frame`, a real WinUI type), and each module's concrete registration class + Views (e.g. `TaskManagerModule`, `TasksPage`) — anything that touches a real Page, Window, or Frame.
+- **`VantageFlow.Tests`** references `VantageFlow.Core` only, never the app project.
+
+One concrete consequence: `NavigationItem` originally carried a WinUI `Symbol` for its icon — moved to a framework-agnostic `NavigationIcon` enum defined in Core, with only `ShellPage` (in the app project) knowing how to translate a `NavigationIcon` to a real `Symbol`. Modules never reference `Symbol` directly. This is the general rule going forward: if a module's `IAppModule`/ViewModel/Model needs to be in Core (so it's testable), nothing it references transitively can require a live WinUI type.

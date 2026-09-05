@@ -129,27 +129,35 @@ Worth deciding the shape of this early, even before it's needed, since retrofitt
 - **Settings schema**: same idea — store a version alongside the settings, transform old shapes forward on load.
 - Each module's persistence is a natural place to own its own schema version, consistent with §7/§8's "each module owns its own store/settings" split.
 
-## 10. Suggested starting folder structure
+## 10. Actual folder/project structure
 
-One WinUI project is enough to get modularity — splitting into multiple assemblies is a later decision, only if a module needs to ship or version independently.
+Revised from the original single-project sketch after a real test failure forced the issue — see `01-decisions-log.md` §16 for why: WinUI app projects carry a deployment auto-initializer that throws outside a packaged app process, so anything that needs to be unit-testable (Models, ViewModels, the module/navigation contracts) has to live outside the WinUI head project entirely, in a WinUI Class Library with no `Microsoft.WindowsAppSDK` package reference. Three projects, not one:
 
 ```
-/App                     — composition root: Program.cs, App.xaml(.cs), ShellPage, module registry/list
-/Core                    — cross-cutting, used by every module: IAppModule, INavigationService,
-                             settings-composition service, base ViewModel (if not fully covered by
-                             the MVVM toolkit), shared converters
-/Modules
-  /TaskManager
-    /Models
-    /ViewModels
-    /Services            — IFooService + implementation pairs
-    /Views               — pages + this module's Dialogs/
-  /Notes                 — same shape, once it's added
-  /...
-/Tests                   — one test project, folders mirroring /Modules
+src/
+  VantageFlow/                     — WinUI head project (packaged/MSIX)
+    App.xaml(.cs)                  — composition root
+    MainWindow.xaml(.cs)           — OS window: title bar + root Frame only
+    ShellPage.xaml(.cs)            — navigation shell; owns NavigationView + content Frame
+    NavigationService.cs           — concrete INavigationService, wraps the real Frame
+    Modules/
+      TaskManager/
+        TaskManagerModule.cs       — IAppModule impl: registers services, contributes nav items
+        Views/                    — Pages + this module's Dialogs/
+  VantageFlow.Core/                — WinUI Class Library (UseWinUI=true, no WindowsAppSDK package)
+    Core/                         — IAppModule, INavigationService, NavigationItem, NavigationIcon
+    Modules/
+      TaskManager/
+        Models/
+        ViewModels/
+    ShellViewModel.cs
+  VantageFlow.Tests/               — references VantageFlow.Core only, never the app project
+    Modules/TaskManager/           — mirrors VantageFlow.Core's module folders
 ```
 
-"Everything about the task manager" — and later, "everything about notes" — is one subtree, not scattered across flat top-level folders every module dumps files into.
+The rule that keeps this working: anything in `VantageFlow.Core` — transitively, everything it references — must compile without a live WinUI type (`Frame`, `Symbol`, `Page`, ...). `NavigationIcon` (a plain enum) exists specifically so `IAppModule`/`NavigationItem` can stay in Core while the real WinUI `Symbol` mapping happens only in `ShellPage`. When a new module needs a Service (not just Models/ViewModels), the same split applies: the interface and any WinUI-free implementation go in Core; only a concrete piece that must touch a live UI type moves to the head project.
+
+Splitting into further assemblies (one per module, instead of folders within these three) is a later decision, only if a module needs to ship or version independently.
 
 ## 11. Testing strategy
 

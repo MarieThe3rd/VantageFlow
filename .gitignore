@@ -22,3 +22,20 @@ Desktop.ini
 [Pp]ublish/
 [Dd]ist/
 [Rr]eleases/
+
+## MSIX packaging output ##
+AppPackages/
+BundleArtifacts/
+*.msix
+*.msixupload
+*.appx
+*.appxbundle
+*.appxupload
+
+## Test results ##
+[Tt]est[Rr]esult*/
+*.trx
+*.coverage
+
+## Build logs ##
+*.binlog
