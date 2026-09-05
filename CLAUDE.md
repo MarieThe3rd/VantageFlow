@@ -13,6 +13,7 @@ This file is the always-loaded index. Keep it short: one line per decision, with
 - **Architecture:** modular monolith, organized as vertical slices per module — not fine-grained per-use-case slicing. Real DI container + interface-per-service from day one. Split across three projects (head/Core/Tests, see above) because unit tests can't reference a WinUI app project directly — anything in `VantageFlow.Core` must stay free of live WinUI types. Full contract and folder layout in `Documentation/02-architecture-and-testing-strategy.md`.
 - **MVVM:** CommunityToolkit.Mvvm + an injected navigation service; one dialog shape everywhere (constructor-in, `Result`-property-out).
 - **Testing:** behavior over implementation — public interfaces and fakes at true external boundaries only, never interaction-testing your own collaborators. Three tiers: logic unit tests (bulk), module integration tests, thin top-layer UI tests for golden paths. UI-automation tool is **FlaUI**, not Playwright (Playwright only drives WebView2 content, not native XAML). Full rationale in `Documentation/02-architecture-and-testing-strategy.md`.
+- **Distribution:** sideload, not the Microsoft Store — doesn't change the MSIX packaging decision (MSIX fully supports sideloading). Signing certificate for real releases (self-signed vs. Azure Artifact Signing) is an open item to settle before the first release, not before — local F5 debugging is unaffected.
 - **License:** not yet decided — open item.
 
 ## Reference material

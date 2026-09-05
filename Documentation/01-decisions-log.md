@@ -95,3 +95,16 @@ Resolved as three projects, not two:
 - **`VantageFlow.Tests`** references `VantageFlow.Core` only, never the app project.
 
 One concrete consequence: `NavigationItem` originally carried a WinUI `Symbol` for its icon — moved to a framework-agnostic `NavigationIcon` enum defined in Core, with only `ShellPage` (in the app project) knowing how to translate a `NavigationIcon` to a real `Symbol`. Modules never reference `Symbol` directly. This is the general rule going forward: if a module's `IAppModule`/ViewModel/Model needs to be in Core (so it's testable), nothing it references transitively can require a live WinUI type.
+
+## 17. Distribution channel: sideload, not Microsoft Store
+
+Doesn't change the packaging decision (§12) — MSIX fully supports sideloading, it isn't Store-exclusive — but it does settle a question §12 left open: how the app gets onto a machine that isn't the dev machine, since Visual Studio's local F5 debug certificate is self-signed and trusted only there.
+
+Checked against Microsoft's current sideloading/signing docs rather than assumed:
+- Sideloading needs no target-machine configuration — on by default since Windows 10 2004 and on all of Windows 11.
+- Signing is mandatory regardless of sideload settings; Windows will not install an unsigned MSIX.
+- **Self-signed cert**: free, but every installer has to manually import and trust that exact certificate first — real friction for anonymous public downloads (e.g. from a GitHub release), fine for a handful of known testers.
+- **CA-trusted cert**: Windows trusts it with no per-machine step. Microsoft's current recommendation for this exact scenario (an ISV/personal project distributing directly, not through the Store) is **Azure Artifact Signing** (formerly "Trusted Signing," ~$10/month, no hardware token, CI/CD-friendly) over a traditional $150–300/year OV certificate.
+- The old one-click "install from a browser link" flow (`ms-appinstaller:` URI) has been **disabled by default since December 2023** — so a hosted `.appinstaller` file now means "download and double-click," not "click a website button," similar in spirit to how the reference app pointed people at winget/Chocolatey/Scoop rather than a web installer.
+
+**Open decision, not blocking now**: which certificate to use for actual releases (self-signed vs. Azure Artifact Signing) — revisit when preparing the first real release, not before. Local development (F5 debugging) is unaffected either way.
