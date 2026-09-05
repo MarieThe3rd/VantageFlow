@@ -52,8 +52,15 @@ Verified against Microsoft's current WinUI/WindowsAppSDK testing docs before dec
 
 - **License:** not yet chosen.
 - **Persistence:** not yet decided how the task manager module stores data (reference app spliced its metadata into the OS Task Scheduler's free-text field as a workaround for that specific external API — this app should default to owning a real data store per module, e.g. SQLite, rather than needing a similar trick).
-- **Packaging model (MSIX vs. unpackaged):** not yet decided — see `02-architecture-and-testing-strategy.md` §1. Matters because it gates background-task support, push notifications, and settings-storage API, so it needs deciding before the composition root is written.
 
 ## 11. Core architecture checked against Microsoft's own guidance
 
-Before locking in §5–9 above, searched and fetched Microsoft's current official docs (`Architecture patterns for WinUI 3 desktop apps`, `Packaging overview`) rather than relying on training-data recall. Result: the DI/MVVM/layering plan already matched almost exactly (same `Microsoft.Extensions.DependencyInjection` + `Hosting` pair, same `App.GetService<T>()` composition-root shape, same "ViewModels never reference UI types" rule). One gap surfaced that wasn't previously considered: **packaging model** (added to Open Decisions above) — Microsoft's current default guidance is that a new WinUI 3 app should stay packaged (MSIX) unless there's a specific reason not to, which cuts against the reference app's unpackaged/winget-style distribution choice. Full detail and the questions that decide it are in `02-architecture-and-testing-strategy.md` §1.
+Before locking in §5–9 above, searched and fetched Microsoft's current official docs (`Architecture patterns for WinUI 3 desktop apps`, `Packaging overview`) rather than relying on training-data recall. Result: the DI/MVVM/layering plan already matched almost exactly (same `Microsoft.Extensions.DependencyInjection` + `Hosting` pair, same `App.GetService<T>()` composition-root shape, same "ViewModels never reference UI types" rule). One gap surfaced that wasn't previously considered: **packaging model** — resolved in §12 below.
+
+## 12. Packaging model: packaged (MSIX)
+
+Decision: go packaged, per Microsoft's current default guidance ("Building a new WinUI 3 app? You're already packaged by default. For most WinUI 3 apps, MSIX ... is the better path.") — no reason surfaced strong enough to deviate from it. If anything, the reasons point *toward* packaged rather than merely failing to argue against it: a task-manager module plausibly wants reminders that fire even when the app isn't running, which needs package identity for background tasks and push notifications; packaged apps also get `ApplicationData.Current.LocalSettings` for free instead of hand-rolling settings storage.
+
+The reference app's unpackaged choice was a deliberate trade for winget/Chocolatey/Scoop distribution outside the Store — a real reason, just not one that applies here by default. Direct GitHub-release distribution of an MSIX (via `.appinstaller` or a signed installer) remains available without giving up package identity; Store distribution is also an option later without an architecture change.
+
+Consequence: settings storage (`Documentation/02-architecture-and-testing-strategy.md` §8) uses `ApplicationData.Current.LocalSettings`, not a hand-rolled JSON file.

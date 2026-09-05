@@ -9,6 +9,7 @@ This file is the always-loaded index. Keep it short: one line per decision, with
 - **Not a fork/refactor** of any reference app — built fresh. See `Documentation/01-decisions-log.md` #1 for why.
 - **Repo:** github.com/MarieThe3rd/VantageFlow, public. `main` requires a PR + CODEOWNERS approval from `@MarieThe3rd` to merge; the owner can still push directly.
 - **Platform:** x64 only for now — ARM64 deferred (adding it later is a publish/CI setting, not an architecture change).
+- **Packaging:** packaged (MSIX), per Microsoft's current default guidance — gets background tasks, push notifications, and `ApplicationData.Current.LocalSettings` for free.
 - **Architecture:** modular monolith, organized as vertical slices per module — not fine-grained per-use-case slicing. Real DI container + interface-per-service from day one. Full contract and folder layout in `Documentation/02-architecture-and-testing-strategy.md`.
 - **MVVM:** CommunityToolkit.Mvvm + an injected navigation service; one dialog shape everywhere (constructor-in, `Result`-property-out).
 - **Testing:** behavior over implementation — public interfaces and fakes at true external boundaries only, never interaction-testing your own collaborators. Three tiers: logic unit tests (bulk), module integration tests, thin top-layer UI tests for golden paths. UI-automation tool is **FlaUI**, not Playwright (Playwright only drives WebView2 content, not native XAML). Full rationale in `Documentation/02-architecture-and-testing-strategy.md`.

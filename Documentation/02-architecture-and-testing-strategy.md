@@ -4,19 +4,11 @@ The concrete shape behind the decisions in `01-decisions-log.md`. This is a livi
 
 Sections 1–5 are checked against Microsoft's own current guidance for this exact scenario — [Architecture patterns for WinUI 3 desktop apps](https://learn.microsoft.com/windows/apps/develop/architecture-patterns) and the [Packaging overview](https://learn.microsoft.com/windows/apps/package-and-deploy/packaging/) — not just the reference-app analysis. Where it differs from what we'd already planned, that's called out explicitly.
 
-## 1. Packaging model — open decision, decide before scaffolding
+## 1. Packaging model: packaged (MSIX)
 
-Not yet chosen; flagged in `01-decisions-log.md` §10. This affects several things below (settings storage, notifications, background execution), so it needs an answer before the composition root is written, not after.
+Decided (`01-decisions-log.md` §12) — per Microsoft's current default guidance: **"Building a new WinUI 3 app? You're already packaged by default. For most WinUI 3 apps, MSIX (via Store or direct download) is the better path."** No reason surfaced strong enough to deviate; if anything the task manager's plausible need for reminders that fire while the app isn't running (background tasks need package identity) points toward packaged, not just fails to argue against it.
 
-Microsoft's current default guidance: **"Building a new WinUI 3 app? You're already packaged by default. For most WinUI 3 apps, MSIX (via Store or direct download) is the better path."** Unpackaged is explicitly framed as a niche choice with real, easy-to-miss limitations — no package identity means no background tasks, no push notifications, no manifest-based file/protocol associations, no `ApplicationData.Current.LocalSettings`, and no automatic updates unless distributed through the Store or an `.appinstaller` file.
-
-The reference app went unpackaged specifically to support winget/Chocolatey/Scoop distribution outside the Store — a deliberate trade-off for that distribution channel, not a default worth copying without the same reason. Questions that decide this for VantageFlow:
-
-- Does the task-manager module need real OS background execution (e.g., a reminder that fires even when the app isn't running), or is "runs while the tray icon is up" enough? Background tasks need package identity.
-- Do you want Store distribution, or direct download / winget-style distribution?
-- Packaged apps get `ApplicationData.Current.LocalSettings` for free; unpackaged apps hand-roll settings storage (both are fine — it's just a decision either way needs to make once, in `Core`, not per-module).
-
-Default recommendation absent a specific reason otherwise: **go packaged (MSIX)** — it's the supported default, and "packaged with external location" exists as a middle ground if a non-Store installer is wanted later without giving up package identity.
+What this buys, concretely: background tasks, push notifications, manifest-based file/protocol associations, and `ApplicationData.Current.LocalSettings` for settings storage — all of which require package identity and none of which an unpackaged app gets. The reference app went unpackaged specifically to support winget/Chocolatey/Scoop distribution outside the Store; that's a real reason for that app, not a default worth copying without the same reason here. If GitHub-release direct-download distribution is wanted later without giving up package identity, "packaged with external location" is the middle-ground path — a decision for the packaging/release setup, not the app architecture.
 
 ## 2. Composition root: DI container from the start
 
@@ -125,7 +117,7 @@ Default to owning a real per-module data store (SQLite via `Microsoft.Data.Sqlit
 
 Each module owns its own settings section (a small POCO of its own). A small settings-composition service aggregates them for persistence. Keep runtime-only state (e.g., "is a snooze currently active") structurally separate from durable user preferences from the start.
 
-Storage mechanism depends on §1: packaged apps get `ApplicationData.Current.LocalSettings` for simple key-value pairs; unpackaged apps hand-roll a JSON file under `%LocalAppData%`. Either way, this is one `Core` service every module's settings section plugs into — not something each module reimplements.
+Per §1 (packaged/MSIX), storage is `ApplicationData.Current.LocalSettings` for simple key-value pairs. This is one `Core` service every module's settings section plugs into — not something each module reimplements.
 
 Static app *configuration* (API endpoints, feature flags — values that don't change per-user) is a different concern from user *settings* — if that's ever needed, `Microsoft.Extensions.Configuration` + `appsettings.json` + `IOptions<T>` is the standard pattern, bound in the same `ConfigureServices` call as everything else.
 
