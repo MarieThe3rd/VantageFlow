@@ -21,8 +21,16 @@ The Person expecting a Task's output back, if it owes a deliverable to someone. 
 _Avoid_: Deliverable to, stakeholder, owed to
 
 **Source**:
-The medium a Requester's request arrived through — email, meeting, ticket, etc. Only meaningful when a Requester is set.
+The medium a Requester's request arrived through — Email, Meeting, or a specific ticketing system (e.g., Ivanti Ticket, ADO Work Item — the system itself is the Source value, not a separate field). Maintained as a user-editable list, like Person, so a new ticketing system can be added later without a code change. Only meaningful when a Requester is set.
 _Avoid_: Channel, origin, medium
+
+**Ticket Number**:
+The identifying number/ID from the originating ticket system (e.g., an Ivanti ticket number, an ADO work item ID). Present only when Source is a ticket-type value.
+_Avoid_: Work item ID, case number
+
+**Ticket Link**:
+A link back to the originating ticket in its source system. Present only when Source is a ticket-type value.
+_Avoid_: URL, work item link
 
 **Project**:
 A tracked effort with its own description and target date, containing the set of Tasks that belong to it, viewable as a unit. A Task can belong to a Project, have a Requester, both, or neither — they're independent facts, not alternatives (a manager can assign you a piece of a larger project, giving both at once).

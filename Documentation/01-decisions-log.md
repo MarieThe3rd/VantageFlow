@@ -78,3 +78,9 @@ Two follow-on scope decisions:
 Stated problem: too many self-generated "ideas" cluttering the to-do list alongside real obligations, making it hard to tell what actually matters. First floated as "a priority setting, 0 being not important" — rejected in favor of a plain two-state `Commitment` (`Obligation` | `Idea`, see `CONTEXT.md`), because a numeric scale reintroduces the same ambiguity it's meant to solve (deciding "is this a 2 or a 3" for every item). A checked-box UI, default unchecked (= Obligation), covers this cleanly.
 
 Checked whether the reference app already had this: it has a same-named-but-unrelated `TaskPriority` field on `ScheduledTaskModel` (`Models/ScheduledTaskModel.cs:306`) — Windows Task Scheduler's OS process-scheduling priority (0=Realtime to 10=Idle, 7=Normal, i.e. CPU precedence for the triggered process), not a personal-importance concept. Confirms this is new domain, and rules out reusing the word "Priority" for it (already means something else in this space).
+
+## 15. Source: ticket systems are first-class values, user-maintainable like Person
+
+When Source is a ticket, it's always from a *specific* system (Ivanti, ADO work items, ...), each needing its own Ticket Number and Ticket Link. Rather than a generic "Ticket" value plus a separate "which system" field, the system itself is the Source value (`Ivanti Ticket`, `ADO Work Item`), matching how the user actually thinks about it.
+
+That list is user-maintainable, same pattern and same reasoning as Person (§13): a new job or a new tool bringing a different ticketing system (e.g., ServiceNow) should be something you add yourself, not something that needs a code change and a new release.
