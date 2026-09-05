@@ -11,7 +11,9 @@
     <Page.Resources>
         <converters:CommitmentToIdeaLabelConverter x:Key="CommitmentToIdeaLabelConverter" />
         <converters:RequesterToSummaryConverter x:Key="RequesterToSummaryConverter" />
+        <converters:RecipientToSummaryConverter x:Key="RecipientToSummaryConverter" />
         <converters:ProjectToSummaryConverter x:Key="ProjectToSummaryConverter" />
+        <converters:TaskSourceSummaryConverter x:Key="TaskSourceSummaryConverter" />
     </Page.Resources>
 
     <Grid Padding="24" RowDefinitions="Auto,*">
@@ -26,10 +28,17 @@
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal" Spacing="12">
+                        <CheckBox
+                            IsChecked="{Binding IsComplete, Mode=TwoWay}"
+                            Checked="TaskComplete_Changed"
+                            Unchecked="TaskComplete_Changed" />
                         <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
                         <TextBlock Text="{Binding Commitment, Converter={StaticResource CommitmentToIdeaLabelConverter}}" Opacity="0.6" />
                         <TextBlock Text="{Binding Requester, Converter={StaticResource RequesterToSummaryConverter}}" Opacity="0.6" />
+                        <TextBlock Text="{Binding Recipient, Converter={StaticResource RecipientToSummaryConverter}}" Opacity="0.6" />
                         <TextBlock Text="{Binding Project, Converter={StaticResource ProjectToSummaryConverter}}" Opacity="0.6" />
+                        <TextBlock Text="{Binding Converter={StaticResource TaskSourceSummaryConverter}}" Opacity="0.6" />
+                        <Button Content="Edit" Click="EditTask_Click" />
                     </StackPanel>
                 </DataTemplate>
             </ListView.ItemTemplate>

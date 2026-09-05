@@ -62,6 +62,19 @@ public class TasksViewModelTests
     }
 
     [Fact]
+    public async Task UpdateTaskAsync_PersistsChangesAndKeepsTheSameTaskInPlace()
+    {
+        var viewModel = CreateViewModel();
+        var task = new TaskItem { Title = "Draft the proposal" };
+        await viewModel.AddTaskAsync(task);
+
+        task.IsComplete = true;
+        await viewModel.UpdateTaskAsync(task);
+
+        Assert.True(Assert.Single(viewModel.Tasks).IsComplete);
+    }
+
+    [Fact]
     public async Task LoadAsync_PopulatesEverythingFromRepositories()
     {
         var taskRepository = new FakeTaskRepository();

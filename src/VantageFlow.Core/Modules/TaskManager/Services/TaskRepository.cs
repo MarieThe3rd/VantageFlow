@@ -35,6 +35,21 @@ public sealed class TaskRepository(IDbContextFactory<TaskManagerDbContext> conte
         await db.SaveChangesAsync();
     }
 
+    public async Task UpdateAsync(TaskItem task)
+    {
+        await using var db = await contextFactory.CreateDbContextAsync();
+
+        // Attach the related entities first (as Unchanged) so that Update's graph walk below
+        // finds them already tracked and leaves them alone, instead of marking them Modified too.
+        AttachIfExisting(db, task.Requester);
+        AttachIfExisting(db, task.Recipient);
+        AttachIfExisting(db, task.Project);
+        AttachIfExisting(db, task.Source);
+
+        db.Tasks.Update(task);
+        await db.SaveChangesAsync();
+    }
+
     private static void AttachIfExisting<TEntity>(TaskManagerDbContext db, TEntity? entity)
         where TEntity : class
     {

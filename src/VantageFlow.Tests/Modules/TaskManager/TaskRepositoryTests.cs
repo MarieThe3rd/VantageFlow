@@ -75,4 +75,31 @@ public sealed class TaskRepositoryTests : IDisposable
 
         Assert.Null(Assert.Single(savedTasks).Requester);
     }
+
+    [Fact]
+    public async Task UpdateAsync_PersistsChanges_WithoutDuplicatingAnAlreadySavedRequester()
+    {
+        // Same disconnected-entity concern as AddAsync, but for Update's graph walk: the
+        // Requester attached here must stay Unchanged, not get marked Modified or re-inserted.
+        var people = new PersonRepository(_contextFactory);
+        var tasks = new TaskRepository(_contextFactory);
+
+        var person = new Person { Name = "Sarah" };
+        await people.AddAsync(person);
+
+        var task = new TaskItem { Title = "Draft the proposal" };
+        await tasks.AddAsync(task);
+
+        task.IsComplete = true;
+        task.Requester = person;
+        await tasks.UpdateAsync(task);
+
+        var savedTasks = await tasks.GetAllAsync();
+        var savedPeople = await people.GetAllAsync();
+        var savedTask = Assert.Single(savedTasks);
+
+        Assert.True(savedTask.IsComplete);
+        Assert.Equal("Sarah", savedTask.Requester?.Name);
+        Assert.Single(savedPeople); // not duplicated by the update
+    }
 }

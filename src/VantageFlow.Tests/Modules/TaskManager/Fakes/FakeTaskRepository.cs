@@ -8,13 +8,26 @@ namespace VantageFlow.Tests.Modules.TaskManager.Fakes;
 public sealed class FakeTaskRepository : ITaskRepository
 {
     private readonly List<TaskItem> _tasks = [];
+    private int _nextId = 1;
 
     public Task<IReadOnlyList<TaskItem>> GetAllAsync() =>
         Task.FromResult<IReadOnlyList<TaskItem>>(_tasks.ToList());
 
     public Task AddAsync(TaskItem task)
     {
+        task.Id = _nextId++;
         _tasks.Add(task);
+        return Task.CompletedTask;
+    }
+
+    public Task UpdateAsync(TaskItem task)
+    {
+        var index = _tasks.FindIndex(t => t.Id == task.Id);
+        if (index >= 0)
+        {
+            _tasks[index] = task;
+        }
+
         return Task.CompletedTask;
     }
 }

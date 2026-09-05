@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using VantageFlow.Core.Modules.TaskManager.Models;
 using VantageFlow.Core.Modules.TaskManager.ViewModels;
 using VantageFlow.Modules.TaskManager.Views.Dialogs;
 
@@ -28,6 +29,28 @@ public sealed partial class TasksPage : Page
         if (await dialog.ShowAsync() == ContentDialogResult.Primary && dialog.Result is not null)
         {
             await ViewModel.AddTaskAsync(dialog.Result);
+        }
+    }
+
+    private async void EditTask_Click(object sender, RoutedEventArgs e)
+    {
+        if (((FrameworkElement)sender).DataContext is not TaskItem existing)
+        {
+            return;
+        }
+
+        var dialog = new AddTaskDialog(ViewModel.People, ViewModel.Projects, ViewModel.Sources, existing) { XamlRoot = XamlRoot };
+        if (await dialog.ShowAsync() == ContentDialogResult.Primary && dialog.Result is not null)
+        {
+            await ViewModel.UpdateTaskAsync(dialog.Result);
+        }
+    }
+
+    private async void TaskComplete_Changed(object sender, RoutedEventArgs e)
+    {
+        if (((FrameworkElement)sender).DataContext is TaskItem task)
+        {
+            await ViewModel.UpdateTaskAsync(task);
         }
     }
 

@@ -7,4 +7,6 @@ public interface ITaskRepository
     Task<IReadOnlyList<TaskItem>> GetAllAsync();
 
     Task AddAsync(TaskItem task);
+
+    Task UpdateAsync(TaskItem task);
 }

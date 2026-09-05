@@ -59,6 +59,21 @@ public sealed partial class TasksViewModel(
         Tasks.Add(task);
     }
 
+    public async Task UpdateTaskAsync(TaskItem task)
+    {
+        await taskRepository.UpdateAsync(task);
+
+        // TaskItem is plain data (no INotifyPropertyChanged, deliberately — see CONTEXT.md) —
+        // mutating it in place doesn't tell the ListView anything changed. Re-setting the same
+        // reference at its index forces ObservableCollection to raise Replace, which makes the
+        // ListView rebind that row's container against the now-updated values.
+        var index = Tasks.IndexOf(task);
+        if (index >= 0)
+        {
+            Tasks[index] = task;
+        }
+    }
+
     public async Task AddPersonAsync(Person person)
     {
         await personRepository.AddAsync(person);
