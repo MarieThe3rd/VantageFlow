@@ -12,6 +12,7 @@ Numbered in the order the corresponding code was actually built, not by folder o
 2. [02-composition-root-and-di.md](02-composition-root-and-di.md) — `App.xaml.cs`, the DI container, `App.GetService<T>()`
 3. [03-navigation-shell-and-modules.md](03-navigation-shell-and-modules.md) — `NavigationView`, `IAppModule`, how a module plugs in
 4. [04-why-a-separate-class-library-for-tests.md](04-why-a-separate-class-library-for-tests.md) — the real test failure that forced the three-project split
+5. [05-add-task-dialogs-and-converters.md](05-add-task-dialogs-and-converters.md) — `ContentDialog`, `IValueConverter`, and a `required`-properties gotcha in generated XAML metadata
 
 More entries get added as each meaningful chunk of code lands (see `CLAUDE.md`'s "Learning companion" convention).
 

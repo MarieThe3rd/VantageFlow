@@ -7,7 +7,8 @@ namespace VantageFlow.Core.Modules.TaskManager.Models;
 /// </summary>
 public sealed class TaskItem
 {
-    public required string Title { get; set; }
+    // Not `required` — see the same note on Person.Name; enforced in AddTaskDialog instead.
+    public string Title { get; set; } = string.Empty;
     public string? Notes { get; set; }
     public Commitment Commitment { get; set; } = Commitment.Obligation;
     public bool IsComplete { get; set; }
