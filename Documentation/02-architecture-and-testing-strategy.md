@@ -2,15 +2,62 @@
 
 The concrete shape behind the decisions in `01-decisions-log.md`. This is a living document — refine it as the app grows, but keep changes deliberate, not accidental drift.
 
-## 1. Composition root: DI container from the start
+Sections 1–5 are checked against Microsoft's own current guidance for this exact scenario — [Architecture patterns for WinUI 3 desktop apps](https://learn.microsoft.com/windows/apps/develop/architecture-patterns) and the [Packaging overview](https://learn.microsoft.com/windows/apps/package-and-deploy/packaging/) — not just the reference-app analysis. Where it differs from what we'd already planned, that's called out explicitly.
 
-Add `Microsoft.Extensions.DependencyInjection` (and `Microsoft.Extensions.Hosting` if hosted-service-style start/stop is useful). Both work fine in an unpackaged WinAppSDK app.
+## 1. Packaging model — open decision, decide before scaffolding
 
-- Build the container once, in the composition root (`App.xaml.cs`'s constructor / `OnLaunched`), store the `IServiceProvider` on `App`.
+Not yet chosen; flagged in `01-decisions-log.md` §10. This affects several things below (settings storage, notifications, background execution), so it needs an answer before the composition root is written, not after.
+
+Microsoft's current default guidance: **"Building a new WinUI 3 app? You're already packaged by default. For most WinUI 3 apps, MSIX (via Store or direct download) is the better path."** Unpackaged is explicitly framed as a niche choice with real, easy-to-miss limitations — no package identity means no background tasks, no push notifications, no manifest-based file/protocol associations, no `ApplicationData.Current.LocalSettings`, and no automatic updates unless distributed through the Store or an `.appinstaller` file.
+
+The reference app went unpackaged specifically to support winget/Chocolatey/Scoop distribution outside the Store — a deliberate trade-off for that distribution channel, not a default worth copying without the same reason. Questions that decide this for VantageFlow:
+
+- Does the task-manager module need real OS background execution (e.g., a reminder that fires even when the app isn't running), or is "runs while the tray icon is up" enough? Background tasks need package identity.
+- Do you want Store distribution, or direct download / winget-style distribution?
+- Packaged apps get `ApplicationData.Current.LocalSettings` for free; unpackaged apps hand-roll settings storage (both are fine — it's just a decision either way needs to make once, in `Core`, not per-module).
+
+Default recommendation absent a specific reason otherwise: **go packaged (MSIX)** — it's the supported default, and "packaged with external location" exists as a middle ground if a non-Store installer is wanted later without giving up package identity.
+
+## 2. Composition root: DI container from the start
+
+Add `Microsoft.Extensions.DependencyInjection` and `Microsoft.Extensions.Hosting` — Microsoft's own architecture guidance uses this exact pair, built on `Host.CreateDefaultBuilder()` in `App.xaml.cs`:
+
+```csharp
+public partial class App : Application
+{
+    public IHost Host { get; }
+
+    public static T GetService<T>() where T : class
+    {
+        if ((App.Current as App)!.Host.Services.GetService(typeof(T)) is not T service)
+            throw new ArgumentException($"{typeof(T)} needs to be registered in ConfigureServices.");
+        return service;
+    }
+
+    public App()
+    {
+        InitializeComponent();
+        Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
+            .UseContentRoot(AppContext.BaseDirectory)
+            .ConfigureServices((context, services) =>
+            {
+                services.AddSingleton<INavigationService, NavigationService>();
+                services.AddTransient<MainViewModel>();
+                services.AddTransient<MainPage>();
+                // each module's RegisterServices (§3) adds to this same collection
+            })
+            .Build();
+    }
+}
+```
+
+Pages resolve their ViewModel via `App.GetService<T>()` in their constructor (not `OnNavigatedTo`, unless the page is cached and needs a fresh instance per navigation).
+
 - Every ViewModel and service takes its dependencies through its constructor.
 - Every service is `IFooService` + `FooService`, defined together, from the moment it's created — not retrofitted later.
+- **Service lifetimes** (from the same guidance): `AddSingleton` for navigation and app-wide state/caches; `AddScoped` for per-window/per-dialog contexts; `AddTransient` for ViewModels and stateless services — register ViewModels as Transient so each navigation gets a fresh instance.
 
-## 2. The module contract
+## 3. The module contract
 
 ```csharp
 public interface IAppModule
@@ -34,39 +81,71 @@ foreach (var module in modules) await module.StartAsync(provider);
 
 Adding a module is: write a class implementing `IAppModule`, add it to the module list. No editing shell XAML, no editing a launch `if/else` chain, no editing the exit handler.
 
-## 3. Shell = navigation only
+## 4. Shell = navigation only
 
-One page (`ShellPage`) owns the `NavigationView` + content `Frame` and nothing else. Every feature — including the task manager, which is just the first module — is its own page navigated into that `Frame`. The shell builds its nav items from the module registry (§2), never a hardcoded list.
+One page (`ShellPage`) owns the `NavigationView` + content `Frame` and nothing else. Every feature — including the task manager, which is just the first module — is its own page navigated into that `Frame`. The shell builds its nav items from the module registry (§3), never a hardcoded list.
 
 Page template (non-negotiable shape for every page in every module): constructor takes/creates its ViewModel; `OnNavigatedTo`/`OnNavigatedFrom` (or `Loaded`/`Unloaded` if cached) do lifecycle only; every handler is a one-line forward to the ViewModel or a `[RelayCommand]` binding; the only code-behind logic allowed is genuinely visual (custom drawing/animation) — never business logic, never a direct service call.
 
-## 4. MVVM
+## 5. MVVM and layering
 
 - **CommunityToolkit.Mvvm**: `ObservableObject`, `[ObservableProperty]`, `[RelayCommand]`.
-- Inject an `INavigationService` (even a thin wrapper over `Frame.Navigate`) into any ViewModel that needs to navigate — never reach for a concrete Page or a static singleton to do it.
+- Inject an `INavigationService` (even a thin wrapper over `Frame.Navigate`) into any ViewModel that needs to navigate — never reach for a concrete Page or a static singleton to do it. (This is the exact mistake the reference-app analysis found — a ViewModel reaching into a concrete Page's static singleton to navigate.)
 
-## 5. Dialogs: one shape, everywhere
+Microsoft's own guidance frames this as a strict layered dependency direction, worth keeping as a standing rule for every module:
+
+```
+┌─────────────────────────────┐
+│ Views (XAML + code-behind)  │  ← UI layer, no business logic
+├─────────────────────────────┤
+│ ViewModels (MVVM Toolkit)   │  ← Presentation logic, commands
+├─────────────────────────────┤
+│ Services / Use Cases        │  ← Business rules, orchestration
+├─────────────────────────────┤
+│ Repositories / Data         │  ← Data access, API clients, caching
+└─────────────────────────────┘
+```
+
+- Each layer depends only on the layer directly below it.
+- ViewModels never reference UI types (`Page`, `Window`, `ContentDialog`).
+- Services define interfaces; implementations live in the data layer.
+- All cross-layer dependencies go through the DI container — never a direct `new`.
+
+## 6. Dialogs: one shape, everywhere
 
 A `ContentDialog` subclass. Inputs through the constructor, output through a `Result` property, its own validation via `args.Cancel`, its own localization/theme. Never define a `ContentDialog` inline inside a page's XAML. This is zero-shared-infrastructure — any module can add a dialog this way needing nothing from the host page but a `XamlRoot`.
 
-## 6. Services: narrow, split by responsibility before they merge
+## 7. Services: narrow, split by responsibility before they merge
 
 For each module, decide up front which of "CRUD against an external system," "domain-model mapping," "history/diagnostics," and "persistence" are separate classes with separate interfaces. Don't let one class accrete all of them. Watch for copy-pasted "almost-identical" services — that's a sign to extract one shared, parameterized abstraction instead of duplicating a file.
 
 Default to owning a real per-module data store (SQLite via `Microsoft.Data.Sqlite` or EF Core, or per-module structured files) rather than splicing structured data into a field an external API wasn't designed to hold it — only reach for that kind of workaround if a future module genuinely has to interoperate with an equally rigid external system.
 
-## 7. Settings: per-module shape from day one
+## 8. Settings: per-module shape from day one
 
-Each module owns its own settings section (a small POCO of its own). A small settings-composition service aggregates them for persistence (one JSON file with named sections, or one file per module). Keep runtime-only state (e.g., "is a snooze currently active") structurally separate from durable user preferences from the start.
+Each module owns its own settings section (a small POCO of its own). A small settings-composition service aggregates them for persistence. Keep runtime-only state (e.g., "is a snooze currently active") structurally separate from durable user preferences from the start.
 
-## 8. Suggested starting folder structure
+Storage mechanism depends on §1: packaged apps get `ApplicationData.Current.LocalSettings` for simple key-value pairs; unpackaged apps hand-roll a JSON file under `%LocalAppData%`. Either way, this is one `Core` service every module's settings section plugs into — not something each module reimplements.
+
+Static app *configuration* (API endpoints, feature flags — values that don't change per-user) is a different concern from user *settings* — if that's ever needed, `Microsoft.Extensions.Configuration` + `appsettings.json` + `IOptions<T>` is the standard pattern, bound in the same `ConfigureServices` call as everything else.
+
+## 9. Versioning and migration
+
+Worth deciding the shape of this early, even before it's needed, since retrofitting a migration story onto live user data later is painful:
+
+- **Local data schema**: version it, and run a migration step at startup that upgrades from any previous version to current (a `DatabaseMigrator`-style class with a switch on stored schema version is the standard shape).
+- **Settings schema**: same idea — store a version alongside the settings, transform old shapes forward on load.
+- Each module's persistence is a natural place to own its own schema version, consistent with §7/§8's "each module owns its own store/settings" split.
+
+## 10. Suggested starting folder structure
 
 One WinUI project is enough to get modularity — splitting into multiple assemblies is a later decision, only if a module needs to ship or version independently.
 
 ```
 /App                     — composition root: Program.cs, App.xaml(.cs), ShellPage, module registry/list
 /Core                    — cross-cutting, used by every module: IAppModule, INavigationService,
-                             base ViewModel (if not fully covered by the MVVM toolkit), shared converters
+                             settings-composition service, base ViewModel (if not fully covered by
+                             the MVVM toolkit), shared converters
 /Modules
   /TaskManager
     /Models
@@ -80,7 +159,7 @@ One WinUI project is enough to get modularity — splitting into multiple assemb
 
 "Everything about the task manager" — and later, "everything about notes" — is one subtree, not scattered across flat top-level folders every module dumps files into.
 
-## 9. Testing strategy
+## 11. Testing strategy
 
 Three tiers, thickest at the bottom. The goal throughout: **test behavior, not implementation** — assert on resulting state/output through a public interface, not on which internal method got called.
 

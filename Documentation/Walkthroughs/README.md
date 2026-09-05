@@ -1,0 +1,16 @@
+# Walkthroughs
+
+This folder is a step-by-step companion to VantageFlow's own code, written as it's built. VantageFlow is deliberately being used as the vehicle for learning WinUI 3 desktop development (see `CLAUDE.md`), the same way past projects served as the vehicle for learning Blazor and React+TypeScript — so this isn't a general WinUI 3 tutorial, it's a walkthrough of *this codebase specifically*, explaining both what each piece does and which WinUI 3 / XAML / MVVM practice it demonstrates.
+
+Written bridging from strong backend .NET/C# experience — no prior desktop-UI or XAML background assumed. Concepts that have a web/Blazor analogue call it out (e.g., `{x:Bind}` vs. Razor's `@bind`); concepts that don't (native UI Automation, `ContentDialog`, package identity) are explained from first principles.
+
+## Reading order
+
+Numbered in the order the corresponding code was actually built, not by folder or topic — read top to bottom to follow the app's construction chronologically. Empty for now; entries get added as each meaningful chunk of code lands (see `CLAUDE.md`'s "Learning companion" convention).
+
+## Format for each entry
+
+- **What was built** — the feature/file(s), in plain terms.
+- **The code, annotated** — the actual snippet with inline explanation, not a paraphrase.
+- **The WinUI 3 practice it demonstrates** — the pattern/API/idiom, and why it's the recommended way (cite `02-architecture-and-testing-strategy.md` or Microsoft's docs where relevant).
+- **How it compares** — a one- or two-line bridge from prior experience, when there's a natural analogue (Blazor, ASP.NET Core, or plain C#/.NET) — skip this if there isn't one, don't force it.

@@ -18,3 +18,8 @@ This file is the always-loaded index. Keep it short: one line per decision, with
 
 - `Documentation/01-decisions-log.md` — every decision above, with the reasoning behind it, in the order it was made.
 - `Documentation/02-architecture-and-testing-strategy.md` — the module contract (`IAppModule`), starting folder structure, and the full testing-strategy writeup.
+- `Documentation/Walkthroughs/` — a step-by-step, code-level companion explaining what was built and which WinUI 3 practice it demonstrates.
+
+## Learning companion (standing convention)
+
+This project is an explicit vehicle for learning WinUI 3 desktop development, bridging from strong backend .NET/C# experience with no assumed XAML/desktop-UI background. **After adding any meaningful chunk of application code, add a matching entry to `Documentation/Walkthroughs/`** (format described in that folder's `README.md`) before moving on — don't wait to be asked. Skip this convention only for pure docs/config changes with no new code pattern to explain.
