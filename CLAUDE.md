@@ -17,6 +17,7 @@ This file is the always-loaded index. Keep it short: one line per decision, with
 
 ## Reference material
 
+- `CONTEXT.md` — the domain glossary (Task, Person, Requester, Recipient, Source, Project). Vocabulary only, no implementation details — consult it before naming a new domain concept, and update it the moment a term is resolved or challenged (see the domain-modeling skill).
 - `Documentation/01-decisions-log.md` — every decision above, with the reasoning behind it, in the order it was made.
 - `Documentation/02-architecture-and-testing-strategy.md` — the module contract (`IAppModule`), starting folder structure, and the full testing-strategy writeup.
 - `Documentation/Walkthroughs/` — a step-by-step, code-level companion explaining what was built and which WinUI 3 practice it demonstrates.

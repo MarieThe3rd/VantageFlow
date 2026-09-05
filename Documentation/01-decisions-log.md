@@ -64,3 +64,11 @@ Decision: go packaged, per Microsoft's current default guidance ("Building a new
 The reference app's unpackaged choice was a deliberate trade for winget/Chocolatey/Scoop distribution outside the Store — a real reason, just not one that applies here by default. Direct GitHub-release distribution of an MSIX (via `.appinstaller` or a signed installer) remains available without giving up package identity; Store distribution is also an option later without an architecture change.
 
 Consequence: settings storage (`Documentation/02-architecture-and-testing-strategy.md` §8) uses `ApplicationData.Current.LocalSettings`, not a hand-rolled JSON file.
+
+## 13. Task Manager domain: Requester/Recipient/Source/Project as independent facts
+
+Before any code: a Task needed to track *who asked for it, why, through what channel, and who it's owed to* — not just a description and due date. Working through concrete scenarios (a manager asking, in a meeting, for a report meant for someone else entirely) showed these are independent, all-optional facts about a Task, not a single tangled "origin," and that "assigned by a person" and "part of a project" aren't mutually exclusive either (a manager can hand you a piece of a larger project at once). See `CONTEXT.md` for the resolved terms (`Person`, `Requester`, `Recipient`, `Source`, `Project`).
+
+Two follow-on scope decisions:
+- **Person is a reusable entity** (name + relationship, e.g. "Sarah — Manager"), not free text per task — chosen specifically so "everything Sarah asked for" is a reliable filter later, not a typo-prone guess.
+- **Project is a fuller entity from day one** (its own description and target date, its tasks viewable as a unit), not a lightweight tag — chosen because a project-level view is a known, not speculative, need.
