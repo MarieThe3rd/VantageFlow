@@ -12,15 +12,45 @@
     DefaultButton="Primary"
     PrimaryButtonClick="ContentDialog_PrimaryButtonClick">
 
-    <StackPanel Spacing="12" MinWidth="360">
-        <TextBox x:Name="TitleBox" Header="Title" PlaceholderText="What needs doing?" />
-        <TextBox x:Name="NotesBox" Header="Notes (optional)" AcceptsReturn="True" Height="72" TextWrapping="Wrap" />
-        <CheckBox x:Name="IdeaCheckBox" Content="Just an idea — not a real commitment" />
-        <ComboBox
-            x:Name="RequesterCombo"
-            Header="Requester (optional)"
-            PlaceholderText="Nobody — this is a self-directed task"
-            DisplayMemberPath="Name"
-            HorizontalAlignment="Stretch" />
-    </StackPanel>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="480">
+        <StackPanel Spacing="12" MinWidth="360">
+            <TextBox x:Name="TitleBox" Header="Title" PlaceholderText="What needs doing?" />
+            <TextBox x:Name="NotesBox" Header="Notes (optional)" AcceptsReturn="True" Height="72" TextWrapping="Wrap" />
+            <CheckBox x:Name="IdeaCheckBox" Content="Just an idea — not a real commitment" />
+
+            <ComboBox
+                x:Name="RequesterCombo"
+                Header="Requester (optional)"
+                PlaceholderText="Nobody — this is a self-directed task"
+                DisplayMemberPath="Name"
+                HorizontalAlignment="Stretch" />
+
+            <ComboBox
+                x:Name="RecipientCombo"
+                Header="Recipient (optional) — who's expecting this back"
+                PlaceholderText="Nobody — nothing owed to anyone"
+                DisplayMemberPath="Name"
+                HorizontalAlignment="Stretch" />
+
+            <ComboBox
+                x:Name="ProjectCombo"
+                Header="Project (optional)"
+                PlaceholderText="No project — a standalone task"
+                DisplayMemberPath="Name"
+                HorizontalAlignment="Stretch" />
+
+            <ComboBox
+                x:Name="SourceCombo"
+                Header="Source (optional)"
+                PlaceholderText="No particular source"
+                DisplayMemberPath="Name"
+                HorizontalAlignment="Stretch"
+                SelectionChanged="SourceCombo_SelectionChanged" />
+
+            <StackPanel x:Name="TicketFieldsPanel" Spacing="12" Visibility="Collapsed">
+                <TextBox x:Name="TicketNumberBox" Header="Ticket number" />
+                <TextBox x:Name="TicketLinkBox" Header="Ticket link" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
 </ContentDialog>

@@ -6,16 +6,24 @@ using VantageFlow.Core.Modules.TaskManager.Services;
 
 namespace VantageFlow.Core.Modules.TaskManager.ViewModels;
 
-public sealed partial class TasksViewModel(ITaskRepository taskRepository, IPersonRepository personRepository)
+public sealed partial class TasksViewModel(
+    ITaskRepository taskRepository,
+    IPersonRepository personRepository,
+    IProjectRepository projectRepository,
+    ISourceRepository sourceRepository)
     : ObservableObject
 {
     public ObservableCollection<TaskItem> Tasks { get; } = [];
 
     /// <summary>
-    /// The reusable Person list Requester/Recipient are picked from — see CONTEXT.md's Person
-    /// entry for why this is a shared list rather than free text per task.
+    /// Reusable lists Requester/Recipient, Project, and Source are picked from — see CONTEXT.md
+    /// for why these are shared lists rather than free text per task.
     /// </summary>
     public ObservableCollection<Person> People { get; } = [];
+
+    public ObservableCollection<Project> Projects { get; } = [];
+
+    public ObservableCollection<Source> Sources { get; } = [];
 
     [RelayCommand]
     public async Task LoadAsync()
@@ -31,6 +39,18 @@ public sealed partial class TasksViewModel(ITaskRepository taskRepository, IPers
         {
             People.Add(person);
         }
+
+        Projects.Clear();
+        foreach (var project in await projectRepository.GetAllAsync())
+        {
+            Projects.Add(project);
+        }
+
+        Sources.Clear();
+        foreach (var source in await sourceRepository.GetAllAsync())
+        {
+            Sources.Add(source);
+        }
     }
 
     public async Task AddTaskAsync(TaskItem task)
@@ -43,5 +63,17 @@ public sealed partial class TasksViewModel(ITaskRepository taskRepository, IPers
     {
         await personRepository.AddAsync(person);
         People.Add(person);
+    }
+
+    public async Task AddProjectAsync(Project project)
+    {
+        await projectRepository.AddAsync(project);
+        Projects.Add(project);
+    }
+
+    public async Task AddSourceAsync(Source source)
+    {
+        await sourceRepository.AddAsync(source);
+        Sources.Add(source);
     }
 }

@@ -24,7 +24,7 @@ public sealed partial class TasksPage : Page
 
     private async void NewTask_Click(object sender, RoutedEventArgs e)
     {
-        var dialog = new AddTaskDialog(ViewModel.People) { XamlRoot = XamlRoot };
+        var dialog = new AddTaskDialog(ViewModel.People, ViewModel.Projects, ViewModel.Sources) { XamlRoot = XamlRoot };
         if (await dialog.ShowAsync() == ContentDialogResult.Primary && dialog.Result is not null)
         {
             await ViewModel.AddTaskAsync(dialog.Result);
@@ -37,6 +37,24 @@ public sealed partial class TasksPage : Page
         if (await dialog.ShowAsync() == ContentDialogResult.Primary && dialog.Result is not null)
         {
             await ViewModel.AddPersonAsync(dialog.Result);
+        }
+    }
+
+    private async void NewProject_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new AddProjectDialog { XamlRoot = XamlRoot };
+        if (await dialog.ShowAsync() == ContentDialogResult.Primary && dialog.Result is not null)
+        {
+            await ViewModel.AddProjectAsync(dialog.Result);
+        }
+    }
+
+    private async void NewSource_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new AddSourceDialog { XamlRoot = XamlRoot };
+        if (await dialog.ShowAsync() == ContentDialogResult.Primary && dialog.Result is not null)
+        {
+            await ViewModel.AddSourceAsync(dialog.Result);
         }
     }
 }

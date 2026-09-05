@@ -18,6 +18,8 @@ public sealed class TaskManagerModule : IAppModule
 
         services.AddTransient<ITaskRepository, TaskRepository>();
         services.AddTransient<IPersonRepository, PersonRepository>();
+        services.AddTransient<IProjectRepository, ProjectRepository>();
+        services.AddTransient<ISourceRepository, SourceRepository>();
         services.AddTransient<TasksViewModel>();
     }
 
