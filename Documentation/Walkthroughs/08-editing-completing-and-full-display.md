@@ -27,6 +27,8 @@ This matters because `Result` needs to carry the task's original `Id` back to th
 
 ## Forcing a list to notice an in-place mutation
 
+> **Superseded** — this approach crashed in practice; see `Documentation/Walkthroughs/10-the-checkbox-crash-and-making-taskitem-observable.md`. Left here, unedited, because the failure and the reasoning that led to it are as instructive as the fix.
+
 `TaskItem` deliberately isn't observable (`CONTEXT.md` — plain data, no framework coupling). But `ObservableCollection<TaskItem>` only tells the `ListView` "something changed" when *its own* contents change (an item added/removed/replaced) — not when a property *inside* an item you already mutated changes. Editing `task.Title` in place and leaving it at the same index would leave the `ListView` showing stale text forever, since nothing tells the binding engine to re-read it.
 
 The fix, in `TasksViewModel.UpdateTaskAsync`:

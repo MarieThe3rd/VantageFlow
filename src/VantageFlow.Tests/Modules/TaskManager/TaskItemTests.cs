@@ -13,4 +13,21 @@ public class TaskItemTests
 
         Assert.Equal(Commitment.Obligation, task.Commitment);
     }
+
+    [Fact]
+    public void MutatingIsComplete_RaisesPropertyChanged()
+    {
+        // Regression guard for the crash in Documentation/Walkthroughs/10: TaskItem must stay
+        // observable so a bound ListView refreshes from an in-place edit without the caller
+        // needing to replace it in its ObservableCollection (which crashed when triggered from
+        // a control that's itself part of that list's item template — "Child collection must
+        // not be modified during measure or arrange").
+        var task = new TaskItem { Title = "Anything" };
+        var raisedFor = new List<string?>();
+        task.PropertyChanged += (_, e) => raisedFor.Add(e.PropertyName);
+
+        task.IsComplete = true;
+
+        Assert.Contains(nameof(TaskItem.IsComplete), raisedFor);
+    }
 }
