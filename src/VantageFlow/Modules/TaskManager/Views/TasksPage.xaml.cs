@@ -11,6 +11,8 @@ public sealed partial class TasksPage : Page
 {
     public TasksViewModel ViewModel { get; }
 
+    public TaskFilter[] FilterOptions { get; } = Enum.GetValues<TaskFilter>();
+
     public TasksPage()
     {
         ViewModel = App.GetService<TasksViewModel>();
@@ -46,12 +48,26 @@ public sealed partial class TasksPage : Page
         }
     }
 
-    private async void TaskComplete_Changed(object sender, RoutedEventArgs e)
+    private void TaskStarted_Changed(object sender, RoutedEventArgs e) => DeferUpdate(sender);
+
+    private void TaskComplete_Changed(object sender, RoutedEventArgs e) => DeferUpdate(sender);
+
+    // Toggling Started/Done can change which filtered bucket a task belongs to, which means
+    // FilteredTasks — the ListView's own bound collection — may need an item added or removed.
+    // The CheckBox raising this event lives inside that same ListView's item template, so doing
+    // that synchronously risks the exact crash fixed in Documentation/Walkthroughs/10 ("Child
+    // collection must not be modified during measure or arrange"). Unlike that fix, there's no
+    // way to avoid a real collection change here — an item genuinely needs to appear or
+    // disappear — so the correct tool this time is deferring the mutation to the next UI dispatch
+    // cycle, once the current layout pass has fully settled.
+    private void DeferUpdate(object sender)
     {
-        if (((FrameworkElement)sender).DataContext is TaskItem task)
+        if (((FrameworkElement)sender).DataContext is not TaskItem task)
         {
-            await ViewModel.UpdateTaskAsync(task);
+            return;
         }
+
+        DispatcherQueue.TryEnqueue(async () => await ViewModel.UpdateTaskAsync(task));
     }
 
     private async void NewPerson_Click(object sender, RoutedEventArgs e)

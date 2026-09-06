@@ -29,7 +29,12 @@ public sealed partial class TaskItem : ObservableObject
     [ObservableProperty]
     private Commitment _commitment = Commitment.Obligation;
 
+    // Single source of truth for "started" — see Documentation/01-decisions-log.md #21. Not
+    // mapped by EF Core directly (Ignore()'d in TaskManagerDbContext); IsStarted below is the
+    // derived, bindable view of it.
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsStarted))]
+    [NotifyPropertyChangedFor(nameof(State))]
     private DateOnly? _startDate;
 
     [ObservableProperty]
@@ -40,7 +45,16 @@ public sealed partial class TaskItem : ObservableObject
     // derived, bindable view of it.
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsComplete))]
+    [NotifyPropertyChangedFor(nameof(State))]
     private DateOnly? _completedDate;
+
+    /// <summary>Derived from StartDate, mirroring IsComplete/CompletedDate — see that property's
+    /// note. What the "Started" checkbox binds to.</summary>
+    public bool IsStarted
+    {
+        get => StartDate.HasValue;
+        set => StartDate = value ? DateOnly.FromDateTime(DateTime.Today) : null;
+    }
 
     /// <summary>Derived from CompletedDate, not its own stored fact — a task is complete exactly
     /// when it has a completion date, never a separately-trackable "done" flag that could drift
@@ -51,6 +65,14 @@ public sealed partial class TaskItem : ObservableObject
         get => CompletedDate.HasValue;
         set => CompletedDate = value ? DateOnly.FromDateTime(DateTime.Today) : null;
     }
+
+    /// <summary>Not Started (no StartDate), In Progress (StartDate but no CompletedDate), or
+    /// Completed (has CompletedDate) — always derived, never stored, so filtering by it can never
+    /// disagree with IsStarted/IsComplete. See CONTEXT.md's Task State entry.</summary>
+    public TaskState State =>
+        CompletedDate.HasValue ? TaskState.Completed :
+        StartDate.HasValue ? TaskState.InProgress :
+        TaskState.NotStarted;
 
     [ObservableProperty]
     private Person? _requester;

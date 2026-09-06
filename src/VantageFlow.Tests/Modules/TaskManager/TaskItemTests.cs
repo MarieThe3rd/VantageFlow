@@ -63,4 +63,36 @@ public class TaskItemTests
 
         Assert.True(task.IsComplete);
     }
+
+    [Theory]
+    [InlineData(false, false, TaskState.NotStarted)]
+    [InlineData(true, false, TaskState.InProgress)]
+    [InlineData(false, true, TaskState.Completed)]
+    [InlineData(true, true, TaskState.Completed)]
+    public void State_IsDerivedFromStartedAndCompleted(bool started, bool completed, TaskState expected)
+    {
+        // State is always derived from StartDate/CompletedDate, never its own stored fact — same
+        // reasoning as IsComplete/IsStarted (Documentation/01-decisions-log.md #21) — so it can
+        // never disagree with them, including the case where both are set.
+        var task = new TaskItem
+        {
+            Title = "Anything",
+            IsStarted = started,
+            IsComplete = completed,
+        };
+
+        Assert.Equal(expected, task.State);
+    }
+
+    [Fact]
+    public void MutatingStartDate_RaisesPropertyChangedForStateToo()
+    {
+        var task = new TaskItem { Title = "Anything" };
+        var raisedFor = new List<string?>();
+        task.PropertyChanged += (_, e) => raisedFor.Add(e.PropertyName);
+
+        task.IsStarted = true;
+
+        Assert.Contains(nameof(TaskItem.State), raisedFor);
+    }
 }

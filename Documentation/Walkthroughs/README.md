@@ -19,6 +19,7 @@ Numbered in the order the corresponding code was actually built, not by folder o
 9. [09-a-second-module-proves-the-pattern.md](09-a-second-module-proves-the-pattern.md) — adding the Notes module: one line in the composition root, a separate per-module database file, and `dotnet ef`'s `--context` flag once a project has more than one `DbContext`
 10. [10-the-checkbox-crash-and-making-taskitem-observable.md](10-the-checkbox-crash-and-making-taskitem-observable.md) — a real runtime crash (mutating a `ListView`'s collection from inside its own item's event handler) diagnosed to root cause, and why the fix is making `TaskItem` observable rather than deferring the mutation
 11. [11-task-dates-and-a-derived-property.md](11-task-dates-and-a-derived-property.md) — `StartDate`/`DueDate`/`CompletedDate`, `[NotifyPropertyChangedFor]` for a derived bindable property, and `EF Core`'s `Ignore()`
+12. [12-derived-state-and-filtering-safely.md](12-derived-state-and-filtering-safely.md) — deriving `TaskState` the same way, two collections (`Tasks` vs. `FilteredTasks`) on purpose, and why `DispatcherQueue.TryEnqueue` is the right fix here after being the wrong one in Walkthrough 10
 
 More entries get added as each meaningful chunk of code lands (see `CLAUDE.md`'s "Learning companion" convention).
 

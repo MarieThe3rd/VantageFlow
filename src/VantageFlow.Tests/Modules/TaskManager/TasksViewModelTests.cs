@@ -75,6 +75,60 @@ public class TasksViewModelTests
     }
 
     [Fact]
+    public async Task AddTaskAsync_DefaultFilterIsActive_HidesCompletedTasks()
+    {
+        var viewModel = CreateViewModel();
+
+        await viewModel.AddTaskAsync(new TaskItem { Title = "Not started yet" });
+        await viewModel.AddTaskAsync(new TaskItem { Title = "Already done", IsComplete = true });
+
+        // Both are in the unfiltered set...
+        Assert.Equal(2, viewModel.Tasks.Count);
+        // ...but the default filter (Active) hides the completed one from the visible list.
+        Assert.Single(viewModel.FilteredTasks);
+        Assert.Equal("Not started yet", viewModel.FilteredTasks.Single().Title);
+    }
+
+    [Fact]
+    public async Task ChangingFilterToCompleted_ShowsOnlyCompletedTasks()
+    {
+        var viewModel = CreateViewModel();
+        await viewModel.AddTaskAsync(new TaskItem { Title = "Not started yet" });
+        await viewModel.AddTaskAsync(new TaskItem { Title = "Already done", IsComplete = true });
+
+        viewModel.Filter = TaskFilter.Completed;
+
+        Assert.Equal("Already done", Assert.Single(viewModel.FilteredTasks).Title);
+    }
+
+    [Fact]
+    public async Task ChangingFilterToAll_ShowsEveryTaskRegardlessOfState()
+    {
+        var viewModel = CreateViewModel();
+        await viewModel.AddTaskAsync(new TaskItem { Title = "Not started yet" });
+        await viewModel.AddTaskAsync(new TaskItem { Title = "Already done", IsComplete = true });
+
+        viewModel.Filter = TaskFilter.All;
+
+        Assert.Equal(2, viewModel.FilteredTasks.Count);
+    }
+
+    [Fact]
+    public async Task MarkingATaskComplete_RemovesItFromTheActiveFilteredView()
+    {
+        var viewModel = CreateViewModel();
+        var task = new TaskItem { Title = "In progress", IsStarted = true };
+        await viewModel.AddTaskAsync(task);
+        Assert.Single(viewModel.FilteredTasks); // visible while active (Filter defaults to Active)
+
+        task.IsComplete = true;
+        await viewModel.UpdateTaskAsync(task);
+
+        Assert.Empty(viewModel.FilteredTasks);
+        Assert.Single(viewModel.Tasks); // still tracked, just no longer in the active view
+    }
+
+    [Fact]
     public async Task LoadAsync_PopulatesEverythingFromRepositories()
     {
         var taskRepository = new FakeTaskRepository();

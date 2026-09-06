@@ -39,3 +39,7 @@ _Avoid_: Initiative, epic
 **Commitment**:
 Whether a Task is an **Obligation** (something the user has to do) or an **Idea** (something they thought of wanting to do, someday). Deliberately a two-state distinction, not a numeric scale, to avoid the ambiguity of picking a priority number. Independent of Requester/Project/Recipient — a self-directed task can still be a real Obligation.
 _Avoid_: Priority (already means something else in this space — see `01-decisions-log.md` §14)
+
+**State**:
+Where a Task stands: **Not Started**, **In Progress**, or **Completed**. Always derived from whether it has a start date and/or a completed date — never its own tracked fact, so it can't disagree with them. Independent of Commitment (an Idea can be In Progress too — starting to explore one doesn't make it an Obligation).
+_Avoid_: Status (this app's code calls it `TaskState`, not `TaskStatus`, to avoid colliding with an unrelated .NET type — see `01-decisions-log.md` §21)
