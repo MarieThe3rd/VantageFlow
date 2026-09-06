@@ -14,6 +14,7 @@
         <converters:RecipientToSummaryConverter x:Key="RecipientToSummaryConverter" />
         <converters:ProjectToSummaryConverter x:Key="ProjectToSummaryConverter" />
         <converters:TaskSourceSummaryConverter x:Key="TaskSourceSummaryConverter" />
+        <converters:DueDateToSummaryConverter x:Key="DueDateToSummaryConverter" />
     </Page.Resources>
 
     <Grid Padding="24" RowDefinitions="Auto,*">
@@ -38,6 +39,7 @@
                         <TextBlock Text="{Binding Recipient, Converter={StaticResource RecipientToSummaryConverter}}" Opacity="0.6" />
                         <TextBlock Text="{Binding Project, Converter={StaticResource ProjectToSummaryConverter}}" Opacity="0.6" />
                         <TextBlock Text="{Binding Converter={StaticResource TaskSourceSummaryConverter}}" Opacity="0.6" />
+                        <TextBlock Text="{Binding DueDate, Converter={StaticResource DueDateToSummaryConverter}}" Opacity="0.6" />
                         <Button Content="Edit" Click="EditTask_Click" />
                     </StackPanel>
                 </DataTemplate>

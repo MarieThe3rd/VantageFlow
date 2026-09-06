@@ -102,4 +102,27 @@ public sealed class TaskRepositoryTests : IDisposable
         Assert.Equal("Sarah", savedTask.Requester?.Name);
         Assert.Single(savedPeople); // not duplicated by the update
     }
+
+    [Fact]
+    public async Task AddAsync_ThenUpdateAsync_RoundTripsStartDueAndCompletedDates()
+    {
+        var tasks = new TaskRepository(_contextFactory);
+        var startDate = new DateOnly(2026, 1, 5);
+        var dueDate = new DateOnly(2026, 1, 10);
+
+        var task = new TaskItem { Title = "File the report", StartDate = startDate, DueDate = dueDate };
+        await tasks.AddAsync(task);
+
+        var afterAdd = Assert.Single(await tasks.GetAllAsync());
+        Assert.Equal(startDate, afterAdd.StartDate);
+        Assert.Equal(dueDate, afterAdd.DueDate);
+        Assert.Null(afterAdd.CompletedDate);
+
+        task.IsComplete = true;
+        await tasks.UpdateAsync(task);
+
+        var afterUpdate = Assert.Single(await tasks.GetAllAsync());
+        Assert.Equal(DateOnly.FromDateTime(DateTime.Today), afterUpdate.CompletedDate);
+        Assert.True(afterUpdate.IsComplete);
+    }
 }

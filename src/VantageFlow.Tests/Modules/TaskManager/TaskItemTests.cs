@@ -30,4 +30,37 @@ public class TaskItemTests
 
         Assert.Contains(nameof(TaskItem.IsComplete), raisedFor);
     }
+
+    [Fact]
+    public void SettingIsCompleteTrue_StampsCompletedDateAsToday()
+    {
+        // CompletedDate is the single source of truth for completion (Documentation/01-decisions-
+        // log.md #20) — IsComplete is derived from it, not tracked separately, specifically so
+        // the two can never drift out of sync.
+        var task = new TaskItem { Title = "Anything" };
+
+        task.IsComplete = true;
+
+        Assert.Equal(DateOnly.FromDateTime(DateTime.Today), task.CompletedDate);
+    }
+
+    [Fact]
+    public void SettingIsCompleteFalse_ClearsCompletedDate()
+    {
+        var task = new TaskItem { Title = "Anything", CompletedDate = new DateOnly(2026, 1, 1) };
+
+        task.IsComplete = false;
+
+        Assert.Null(task.CompletedDate);
+    }
+
+    [Fact]
+    public void SettingCompletedDateDirectly_MakesIsCompleteTrue()
+    {
+        // Confirms the derivation works both ways — setting a completion date (e.g. to correct
+        // it via the edit dialog) is itself what "complete" means, not something tracked separately.
+        var task = new TaskItem { Title = "Anything", CompletedDate = new DateOnly(2026, 1, 1) };
+
+        Assert.True(task.IsComplete);
+    }
 }

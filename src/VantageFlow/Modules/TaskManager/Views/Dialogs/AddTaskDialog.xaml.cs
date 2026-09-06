@@ -35,6 +35,9 @@ public sealed partial class AddTaskDialog : ContentDialog
             TitleBox.Text = existing.Title;
             NotesBox.Text = existing.Notes ?? string.Empty;
             IdeaCheckBox.IsChecked = existing.Commitment == Commitment.Idea;
+            StartDatePicker.Date = ToDateTimeOffset(existing.StartDate);
+            DueDatePicker.Date = ToDateTimeOffset(existing.DueDate);
+            CompletedDatePicker.Date = ToDateTimeOffset(existing.CompletedDate);
             RequesterCombo.SelectedItem = peopleList.FirstOrDefault(p => p.Id == existing.Requester?.Id);
             RecipientCombo.SelectedItem = peopleList.FirstOrDefault(p => p.Id == existing.Recipient?.Id);
             ProjectCombo.SelectedItem = ((List<Project>)ProjectCombo.ItemsSource).FirstOrDefault(p => p.Id == existing.Project?.Id);
@@ -70,6 +73,9 @@ public sealed partial class AddTaskDialog : ContentDialog
         task.Title = title;
         task.Notes = notes.Length > 0 ? notes : null;
         task.Commitment = IdeaCheckBox.IsChecked == true ? Commitment.Idea : Commitment.Obligation;
+        task.StartDate = ToDateOnly(StartDatePicker.Date);
+        task.DueDate = ToDateOnly(DueDatePicker.Date);
+        task.CompletedDate = ToDateOnly(CompletedDatePicker.Date);
         task.Requester = RequesterCombo.SelectedItem as Person;
         task.Recipient = RecipientCombo.SelectedItem as Person;
         task.Project = ProjectCombo.SelectedItem as Project;
@@ -79,4 +85,10 @@ public sealed partial class AddTaskDialog : ContentDialog
 
         Result = task;
     }
+
+    private static DateOnly? ToDateOnly(DateTimeOffset? date) =>
+        date is { } d ? DateOnly.FromDateTime(d.Date) : null;
+
+    private static DateTimeOffset? ToDateTimeOffset(DateOnly? date) =>
+        date is { } d ? new DateTimeOffset(d.ToDateTime(TimeOnly.MinValue)) : null;
 }

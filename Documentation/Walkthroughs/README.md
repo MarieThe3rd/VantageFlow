@@ -18,6 +18,7 @@ Numbered in the order the corresponding code was actually built, not by folder o
 8. [08-editing-completing-and-full-display.md](08-editing-completing-and-full-display.md) — binding a converter to the whole object, one dialog serving both create and edit, forcing a `ListView` to notice an in-place mutation, and updating a disconnected entity graph safely
 9. [09-a-second-module-proves-the-pattern.md](09-a-second-module-proves-the-pattern.md) — adding the Notes module: one line in the composition root, a separate per-module database file, and `dotnet ef`'s `--context` flag once a project has more than one `DbContext`
 10. [10-the-checkbox-crash-and-making-taskitem-observable.md](10-the-checkbox-crash-and-making-taskitem-observable.md) — a real runtime crash (mutating a `ListView`'s collection from inside its own item's event handler) diagnosed to root cause, and why the fix is making `TaskItem` observable rather than deferring the mutation
+11. [11-task-dates-and-a-derived-property.md](11-task-dates-and-a-derived-property.md) — `StartDate`/`DueDate`/`CompletedDate`, `[NotifyPropertyChangedFor]` for a derived bindable property, and `EF Core`'s `Ignore()`
 
 More entries get added as each meaningful chunk of code lands (see `CLAUDE.md`'s "Learning companion" convention).
 

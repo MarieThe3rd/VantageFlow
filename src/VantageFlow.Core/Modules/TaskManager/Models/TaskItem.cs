@@ -30,7 +30,27 @@ public sealed partial class TaskItem : ObservableObject
     private Commitment _commitment = Commitment.Obligation;
 
     [ObservableProperty]
-    private bool _isComplete;
+    private DateOnly? _startDate;
+
+    [ObservableProperty]
+    private DateOnly? _dueDate;
+
+    // Single source of truth for completion — see Documentation/01-decisions-log.md #20. Not
+    // mapped by EF Core directly (Ignore()'d in TaskManagerDbContext); IsComplete below is the
+    // derived, bindable view of it.
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsComplete))]
+    private DateOnly? _completedDate;
+
+    /// <summary>Derived from CompletedDate, not its own stored fact — a task is complete exactly
+    /// when it has a completion date, never a separately-trackable "done" flag that could drift
+    /// out of sync with it. Setting this stamps or clears CompletedDate; it's what the
+    /// complete/incomplete checkbox binds to, so toggling it keeps working exactly as before.</summary>
+    public bool IsComplete
+    {
+        get => CompletedDate.HasValue;
+        set => CompletedDate = value ? DateOnly.FromDateTime(DateTime.Today) : null;
+    }
 
     [ObservableProperty]
     private Person? _requester;

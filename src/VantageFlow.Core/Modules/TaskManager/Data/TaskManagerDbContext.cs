@@ -18,6 +18,10 @@ public sealed class TaskManagerDbContext(DbContextOptions<TaskManagerDbContext> 
             // silently change what an existing row means.
             task.Property(t => t.Commitment).HasConversion<string>();
 
+            // Derived from CompletedDate (see TaskItem) — has custom get/set logic, not a stored
+            // fact, so it must not become its own column.
+            task.Ignore(t => t.IsComplete);
+
             // TaskItem has two references to Person (Requester, Recipient); EF Core can't infer
             // which foreign key belongs to which navigation without this. Shadow FK properties
             // (declared here, not on TaskItem) keep persistence plumbing out of the domain model.

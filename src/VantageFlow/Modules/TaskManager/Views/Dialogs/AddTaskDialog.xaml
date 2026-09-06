@@ -12,11 +12,16 @@
     DefaultButton="Primary"
     PrimaryButtonClick="ContentDialog_PrimaryButtonClick">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="480">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="560">
         <StackPanel Spacing="12" MinWidth="360">
             <TextBox x:Name="TitleBox" Header="Title" PlaceholderText="What needs doing?" />
             <TextBox x:Name="NotesBox" Header="Notes (optional)" AcceptsReturn="True" Height="72" TextWrapping="Wrap" />
             <CheckBox x:Name="IdeaCheckBox" Content="Just an idea — not a real commitment" />
+
+            <StackPanel Orientation="Horizontal" Spacing="12">
+                <CalendarDatePicker x:Name="StartDatePicker" Header="Start date (optional)" />
+                <CalendarDatePicker x:Name="DueDatePicker" Header="Due date (optional)" />
+            </StackPanel>
 
             <ComboBox
                 x:Name="RequesterCombo"
@@ -51,6 +56,10 @@
                 <TextBox x:Name="TicketNumberBox" Header="Ticket number" />
                 <TextBox x:Name="TicketLinkBox" Header="Ticket link" />
             </StackPanel>
+
+            <CalendarDatePicker
+                x:Name="CompletedDatePicker"
+                Header="Completed date (optional) — set automatically by the checkbox in the list; adjust here if it's wrong" />
         </StackPanel>
     </ScrollViewer>
 </ContentDialog>
