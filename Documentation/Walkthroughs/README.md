@@ -16,6 +16,7 @@ Numbered in the order the corresponding code was actually built, not by folder o
 6. [06-sqlite-persistence-with-ef-core.md](06-sqlite-persistence-with-ef-core.md) — `IDbContextFactory` for desktop apps, shadow FK properties, the disconnected-entity gotcha, and running EF migrations against a class-library project
 7. [07-recipient-project-source-fields.md](07-recipient-project-source-fields.md) — scaling the reusable-picker pattern, conditional fields via `SelectionChanged`, and a `DateOnly`/`CalendarDatePicker` type gap
 8. [08-editing-completing-and-full-display.md](08-editing-completing-and-full-display.md) — binding a converter to the whole object, one dialog serving both create and edit, forcing a `ListView` to notice an in-place mutation, and updating a disconnected entity graph safely
+9. [09-a-second-module-proves-the-pattern.md](09-a-second-module-proves-the-pattern.md) — adding the Notes module: one line in the composition root, a separate per-module database file, and `dotnet ef`'s `--context` flag once a project has more than one `DbContext`
 
 More entries get added as each meaningful chunk of code lands (see `CLAUDE.md`'s "Learning companion" convention).
 

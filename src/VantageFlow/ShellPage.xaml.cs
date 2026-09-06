@@ -49,6 +49,7 @@ public sealed partial class ShellPage : Page
     private static Symbol ToSymbol(NavigationIcon icon) => icon switch
     {
         NavigationIcon.List => Symbol.List,
+        NavigationIcon.Document => Symbol.Document,
         _ => Symbol.Placeholder,
     };
 }

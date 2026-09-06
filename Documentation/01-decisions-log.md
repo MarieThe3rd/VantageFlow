@@ -120,3 +120,11 @@ Three non-obvious things this surfaced, each written up in `Documentation/Walkth
 - **Disconnected entities**: a fresh `DbContext` per repository call means a Requester saved by one call is "unknown" to a Task saved by the next — has to be `Attach()`-ed as `Unchanged` or EF Core tries to insert a duplicate Person. A real integration test (`TaskRepositoryTests`, against a genuine temp-file SQLite database, not a fake) specifically guards this.
 
 Migrations are authored with `dotnet-ef` against `VantageFlow.Core` (`--project`) using `VantageFlow` as the runtime host (`--startup-project`) — a class-library-only project couldn't run the design-time tooling on its own (its `UseWinUI=true` still pulls in a Windows SDK runtime pack the design-time host can't resolve standalone). Applied automatically at app startup via `TaskManagerModule.StartAsync` (`Database.MigrateAsync()`), not by a separate install step.
+
+## 19. Second module (Notes) added — the module contract's central claim, checked against evidence
+
+`Documentation/02-architecture-and-testing-strategy.md` §2 claimed adding a module never requires editing the shell or composition root — asserted before any second module existed to test it against. Adding `NotesModule` confirmed it: the only change outside `Modules/Notes/` was one line in `App.xaml.cs`'s `Modules` list. `ShellPage` needed no edit — it already builds its nav menu from every registered module's `GetNavigationItems()`.
+
+Notes gets its **own SQLite database file** (`notes.db`, separate from TaskManager's `vantageflow.db`), not a shared one — two `DbContext`s sharing one file would collide on the same `__EFMigrationsHistory` table name by default, and a separate file per module more directly matches "a module could ship or version independently" (§7/§10). `dotnet ef migrations add` needed one new flag once a second `DbContext` existed: `--context NotesDbContext`, to disambiguate which context to target.
+
+Notes was kept deliberately minimal — no reusable-entity pickers, no edit flow — specifically to test the shell/composition/persistence architecture, not to re-prove patterns TaskManager already established.

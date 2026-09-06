@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml;
 using VantageFlow.Core;
+using VantageFlow.Modules.Notes;
 using VantageFlow.Modules.TaskManager;
 
 namespace VantageFlow;
@@ -16,6 +17,7 @@ public partial class App : Application
     private static readonly IReadOnlyList<IAppModule> Modules =
     [
         new TaskManagerModule(),
+        new NotesModule(),
     ];
 
     public IHost Host { get; }

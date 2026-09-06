@@ -1,6 +1,6 @@
 # VantageFlow
 
-A modular WinUI 3 desktop app. First module is a task manager; the architecture exists specifically so future modules (notes, habits, whatever comes next) plug in without editing shared code. Scaffolded and building: `VantageFlow.sln` → `src/VantageFlow` (WinUI head), `src/VantageFlow.Core` (testable Models/ViewModels/Core contracts), `src/VantageFlow.Tests`.
+A modular WinUI 3 desktop app. Two modules so far — Task Manager and Notes — proving the architecture's central claim: a new module plugs in via one line in `App.xaml.cs`, nothing shared needs editing. Scaffolded and building: `VantageFlow.sln` → `src/VantageFlow` (WinUI head), `src/VantageFlow.Core` (testable Models/ViewModels/Core contracts), `src/VantageFlow.Tests`.
 
 This file is the always-loaded index. Keep it short: one line per decision, with the reasoning and full detail pushed to `Documentation/`. When a new stable decision gets made in conversation, add its one-liner here and its rationale there — don't let this file grow into the reasoning itself.
 

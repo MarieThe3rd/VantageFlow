@@ -7,4 +7,5 @@ namespace VantageFlow.Core;
 public enum NavigationIcon
 {
     List,
+    Document,
 }
